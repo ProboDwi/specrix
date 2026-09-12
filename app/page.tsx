@@ -1,69 +1,126 @@
-import Image from "next/image";
+export const dynamic = "force-dynamic";
 
-export default function Home() {
+import Link from "next/link";
+import { prisma } from "@/lib/db";
+import GadgetCard from "@/components/GadgetCard";
+
+export default async function HomePage() {
+  const [featuredHp, featuredLaptop, totalCount] = await Promise.all([
+    prisma.gadget.findMany({
+      where: { category: "HP", isActive: true },
+      orderBy: { priceIdr: "asc" },
+      take: 4,
+      include: { brand: { select: { id: true, name: true, slug: true } } },
+    }),
+    prisma.gadget.findMany({
+      where: { category: "LAPTOP", isActive: true },
+      orderBy: { priceIdr: "asc" },
+      take: 4,
+      include: { brand: { select: { id: true, name: true, slug: true } } },
+    }),
+    prisma.gadget.count({ where: { isActive: true } }),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Hero */}
+      <section className="py-20 text-center">
+        <div className="inline-flex items-center gap-2 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
+          ⚡ {totalCount}+ Gadget Tersedia
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
+          Temukan Gadget{" "}
+          <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+            Sesuai Budget
+          </span>
+          <br />Kamu
+        </h1>
+        <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+          Bandingkan spesifikasi HP &amp; laptop secara berdampingan. Data akurat,
+          mudah dipahami, cocok untuk semua budget.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            href="/gadgets"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3.5 rounded-2xl transition-colors text-base"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Jelajahi Semua Gadget
+          </Link>
+          <Link
+            href="/compare"
+            className="bg-gray-800 hover:bg-gray-700 text-white font-semibold px-8 py-3.5 rounded-2xl transition-colors text-base"
           >
-            Documentation
-          </a>
+            Bandingkan Gadget
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Category cards */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
+        <Link
+          href="/gadgets?category=HP"
+          className="group relative bg-gradient-to-br from-emerald-900/40 to-gray-900 border border-emerald-800/40 hover:border-emerald-500/50 rounded-2xl p-6 transition-all"
+        >
+          <div className="text-4xl mb-3">📱</div>
+          <h2 className="text-xl font-bold text-white mb-1">Smartphone</h2>
+          <p className="text-sm text-gray-400">Android &amp; iOS — dari entry hingga flagship</p>
+          <span className="absolute top-4 right-4 text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
+        </Link>
+        <Link
+          href="/gadgets?category=LAPTOP"
+          className="group relative bg-gradient-to-br from-blue-900/40 to-gray-900 border border-blue-800/40 hover:border-blue-500/50 rounded-2xl p-6 transition-all"
+        >
+          <div className="text-4xl mb-3">💻</div>
+          <h2 className="text-xl font-bold text-white mb-1">Laptop</h2>
+          <p className="text-sm text-gray-400">Produktivitas, gaming, hingga ultrabook tipis</p>
+          <span className="absolute top-4 right-4 text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
+        </Link>
+      </section>
+
+      {/* Featured Smartphones */}
+      <section className="mb-14">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">📱 Smartphone Terjangkau</h2>
+          <Link href="/gadgets?category=HP&sort=price_asc" className="text-sm text-indigo-400 hover:text-indigo-300">
+            Lihat semua →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {featuredHp.map((g) => (
+            <GadgetCard key={g.id} {...g} specs={g.specs as Record<string, unknown>} />
+          ))}
+        </div>
+      </section>
+
+      {/* Featured Laptops */}
+      <section className="mb-14">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-white">💻 Laptop Terjangkau</h2>
+          <Link href="/gadgets?category=LAPTOP&sort=price_asc" className="text-sm text-indigo-400 hover:text-indigo-300">
+            Lihat semua →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {featuredLaptop.map((g) => (
+            <GadgetCard key={g.id} {...g} specs={g.specs as Record<string, unknown>} />
+          ))}
+        </div>
+      </section>
+
+      {/* Compare CTA */}
+      <section className="bg-gradient-to-br from-indigo-900/30 to-violet-900/20 border border-indigo-500/20 rounded-3xl p-8 md:p-12 text-center mb-16">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Bingung pilih yang mana?</h2>
+        <p className="text-gray-400 mb-6 max-w-lg mx-auto">
+          Gunakan fitur Compare untuk membandingkan 2–3 gadget secara berdampingan.
+          Klik &quot;+ Bandingkan&quot; di kartu gadget mana saja untuk memulai.
+        </p>
+        <Link
+          href="/compare"
+          className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors"
+        >
+          Mulai Bandingkan
+        </Link>
+      </section>
     </div>
   );
 }

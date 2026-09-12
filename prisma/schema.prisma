@@ -1,0 +1,51 @@
+// Specrix — Database Schema
+// Prisma ORM v7 with PostgreSQL (Supabase)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Category {
+  HP
+  LAPTOP
+}
+
+model Brand {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?  @map("logo_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  gadgets   Gadget[]
+
+  @@map("brands")
+}
+
+model Gadget {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  category         Category
+  brandId          String    @map("brand_id")
+  brand            Brand     @relation(fields: [brandId], references: [id])
+  priceIdr         Int       @map("price_idr")
+  imageUrl         String?   @map("image_url")
+  shortDesc        String?   @map("short_desc")
+  specs            Json      @default("{}")
+  sourceUrl        String?   @map("source_url")
+  lastVerifiedDate DateTime? @map("last_verified_date")
+  isActive         Boolean   @default(true) @map("is_active")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([brandId])
+  @@index([priceIdr])
+  @@index([isActive])
+  @@map("gadgets")
+}
