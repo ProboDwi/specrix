@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompareBar from "@/components/CompareBar";
+import { CompareProvider } from "@/lib/compare-context";
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -26,10 +27,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id">
       <body className={`${geist.className} bg-gray-950 text-gray-100 antialiased`}>
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <CompareBar />
-        <Footer />
+        <CompareProvider>
+          <Navbar />
+          <main className="min-h-screen">{children}</main>
+          <CompareBar />
+          <Footer />
+        </CompareProvider>
       </body>
     </html>
   );
